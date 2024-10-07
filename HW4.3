@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+def rotation_matrix(axis, theta):
+    # Normalize the axis
+    axis = axis / np.linalg.norm(axis)
+    x, y, z = axis
+
+    # Calculate sine and cosine of theta
+    cos_theta, sin_theta = np.cos(theta), np.sin(theta)
+
+    # Create the rotation matrix using Rodrigues' formula
+    return np.array([
+        [cos_theta + x*x*(1 - cos_theta), x*y*(1 - cos_theta) - z*sin_theta, x*z*(1 - cos_theta) + y*sin_theta],
+        [y*x*(1 - cos_theta) + z*sin_theta, cos_theta + y*y*(1 - cos_theta), y*z*(1 - cos_theta) - x*sin_theta],
+        [z*x*(1 - cos_theta) - y*sin_theta, z*y*(1 - cos_theta) + x*sin_theta, cos_theta + z*z*(1 - cos_theta)]
+    ])
+
+def plot_coordinate_frame(R, origin=np.array([0, 0, 0])):
+    # Define original axes
+    axes = np.eye(3)  # Identity matrix represents the unit axes
+
+    # Rotate axes
+    new_axes = R @ axes.T  # Matrix multiplication
+
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the axes
+    colors = ['r', 'g', 'b']  # Colors for X, Y, Z
+    labels = ['X-axis', 'Y-axis', 'Z-axis']
+
+    for i in range(3):
+        ax.quiver(origin[0], origin[1], origin[2],
+                   new_axes[0, i], new_axes[1, i], new_axes[2, i],
+                   color=colors[i], length=1, label=labels[i], arrow_length_ratio=0.1)
+
+    # Set limits and labels
+    ax.set_xlim([-2, 2])
+    ax.set_ylim([-2, 2])
+    ax.set_zlim([-2, 2])
+    ax.set_xlabel('X-axis')
+    ax.set_ylabel('Y-axis')
+    ax.set_zlabel('Z-axis')
+    ax.set_title('3D Coordinate Frame')
+    ax.legend()
+
+    plt.grid()
+    plt.show()
+
+# Given rotation vector (1, 2, 0)
+omega = np.array([1, 2, 0])
+theta = np.linalg.norm(omega)  # Calculate the angle
+
+# Get the rotation matrix
+R = rotation_matrix(omega, theta)
+
+# Plot the new coordinate frame
+plot_coordinate_frame(R)
